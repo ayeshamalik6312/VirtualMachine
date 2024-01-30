@@ -66,60 +66,73 @@ int main(int argc, char* argv[]) {
 
         // Execute 
         if (IR.OP == 1) { 
-            // ADD
-            // pas[sp + 1] = pas[sp + 1] + pas[sp]
-			// sp = sp + 1;
+            //LIT OPERATION
+            SP--;
+            pas[SP] = IR.M;
         }
         else if (IR.OP == 2) { 
-            // SUB
-            // pas[sp + 1] = pas[sp + 1] - pas[sp]
-			// sp = sp + 1;
+            // RTN OPERATION
+            SP = BP + 1;
+            BP = pas[SP - 2];
+            PC = pas[SP - 3];
         }
         else if (IR.OP == 3) { 
-            // MUL
-            // pas[sp + 1] = pas[sp + 1] * pas[sp]
-			// sp = sp + 1;
+            // LOD OPERATION
+            SP--;
+            pas[SP] = pas[base(BP,IR.L) - IR.M];
         }
         else if (IR.OP == 4) { 
-            // DIV
-            // pas[sp + 1] = pas[sp + 1] / pas[sp]
-			// sp = sp + 1;
+            // STO OPERATOR
+            pas[base(BP,IR.L) - IR.M] = pas[SP];
+            SP--;
         }
         else if (IR.OP == 5) { 
-            // EQL
-            // pas[sp + 1] = pas[sp + 1] == pas[sp]
-			// sp = sp + 1;
+            // CAL OPERATION
+            pas[SP - 1] = base(BP,IR.L); //ESTABLISH STATIC LINK
+            pas[SP - 2] = BP; //ESTABLISH DYNAMIC LINK
+            pas[SP - 3] = PC; // RETURN ADDRESS
+            BP = SP - 1;
+            PC = IR.M;
         }
         else if (IR.OP == 6) { 
-            // NEQ
-            // pas[sp + 1] = pas[sp + 1] != pas[sp]
-			// sp = sp + 1;
+            // INC OPERATION
+            SP = SP - IR.M;
         }
         else if (IR.OP == 7) { 
-            // LSS
-            // pas[sp + 1] = pas[sp + 1] < pas[sp]
-			// sp = sp + 1;
+            // JMP OPERATION
+            PC = IR.M;
         }
         else if (IR.OP == 8) { 
-            // LEQ
-            // pas[sp + 1] = pas[sp + 1] <= pas[sp]
-			// sp = sp + 1;
+            // JPC OPERATION
+            if (pas[SP] == 0)
+            {
+                PC = IR.M;
+                SP++;
+            }
+            
         }
         else if (IR.OP == 9) { 
-            // GTR
-            // pas[sp + 1] = pas[sp + 1] > pas[sp]
-		    // sp = sp + 1;
-        }
-        else if (IR.OP == 10) { 
-            // GEQ
-            // pas[sp + 1] = pas[sp + 1] >= pas[sp]
-		    // sp = sp + 1;
+            // SYS OPERATIONS
+            if (IR.M == 1)
+            {
+                printf("%d",pas[SP]);
+                SP++;
+            }
 
+            if (IR.M == 2)
+            {
+                SP--;
+                printf("Please Enter an Integer: ");
+                scanf("%d", &pas[SP]);
+            }
+
+            if (IR.M == 3)
+            {
+                flag = 0;
+            }
+            
         }
-        else if (IR.OP == 11) { 
-            // ODD 
-            // pas[sp] = pas[sp] % 2
-        }
+        
     }
 
     // After the fetch-execute cycle is done we need to output it
