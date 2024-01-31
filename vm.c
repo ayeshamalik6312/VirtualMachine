@@ -2,6 +2,7 @@
 
 #define ARRAY_SIZE 500 
 #include <stdio.h>
+#include <string.h>
 
 // Global Variables 
 int BP = 499, SP = 500, PC = 0;
@@ -57,7 +58,7 @@ int main(int argc, char* argv[]) {
     // Instruction Cycle
     int flag = 0; 
     InstructionRegister IR; 
-    while (!flag) {
+    while (!flag) {//Switch or if statements are fine ?
         // Fetch
         IR.OP = pas[PC]; 
         IR.L = pas[PC + 1]; 
@@ -72,11 +73,80 @@ int main(int argc, char* argv[]) {
         }
         else if (IR.OP == 2) { 
             // RTN OPERATION
-            SP = BP + 1;
-            BP = pas[SP - 2];
-            PC = pas[SP - 3];
-        }
-        else if (IR.OP == 3) { 
+            if (IR.M == 0)
+            {
+                SP = BP - 1;
+                BP = pas[SP - 2];
+                PC = pas[SP - 3];
+            }
+
+            if (IR.M == 1)//ADD OP
+            {
+                pas[SP - 1] = pas[SP - 1] + pas[SP];
+                SP--; 
+            }
+
+            if (IR.M == 2)//SUB OP
+            {
+                pas[SP - 1] = pas[SP - 1] - pas[SP];
+                SP--;
+            }
+
+            if (IR.M == 3)//MUL OP
+            {
+                pas[SP - 1] = pas[SP - 1] * pas[SP];
+                SP--;
+            }
+
+            if (IR.M == 4)//DIV OP
+            {
+                pas[SP - 1] = pas[SP - 1] / pas[SP];
+                SP--;
+            }
+
+            if (IR.M == 5)//EQL OP
+            {
+                pas[SP - 1] = pas[SP - 1] == pas[SP];
+                SP--;
+            }
+
+            if (IR.M == 6)//NEQ OP
+            {
+                pas[SP - 1] = pas[SP - 1] != pas[SP];
+                SP--;
+            }
+
+            if (IR.M == 7)//LSS OP
+            {
+                pas[SP - 1] = pas[SP - 1] < pas[SP];
+                SP--;
+            }
+
+            if (IR.M == 8)//LEQ OP
+            {
+                pas[SP - 1] = pas[SP - 1] <= pas[SP];
+                SP--;
+            }
+
+            if (IR.M == 9)//GTR OP
+            {
+                pas[SP - 1] = pas[SP - 1] > pas[SP];
+                SP--;
+            }
+
+            if (IR.M == 10)//GEQ OP
+            {
+                pas[SP - 1] = pas[SP - 1] >= pas[SP];
+                SP--;
+            }
+
+            if (IR.M == 11)//ODD OP
+            {
+                pas[SP] = pas[SP] % 2;
+            }
+            
+
+        }else if (IR.OP == 3) { 
             // LOD OPERATION
             SP--;
             pas[SP] = pas[base(BP,IR.L) - IR.M];
@@ -123,7 +193,7 @@ int main(int argc, char* argv[]) {
             {
                 SP--;
                 printf("Please Enter an Integer: ");
-                scanf("%d", &pas[SP]);
+                scanf("%c", &pas[SP]); //HANDLE CHAR TO INT CONVERSION ?*****
             }
 
             if (IR.M == 3)
