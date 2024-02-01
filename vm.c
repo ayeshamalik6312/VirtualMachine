@@ -50,20 +50,31 @@ int main(int argc, char* argv[]) {
     }
     fclose(file);
 
-    for (int i = 0; i < index; i++) {
-        printf("%d\n", pas[i]);
-    }
+    
 
-
+    printf("INITIAL VALUES - PC: %d BP: %d SP: %d\n",PC,BP,SP);
     // Instruction Cycle
     int flag = 0; 
-    InstructionRegister IR; 
+    int testCount = 0;
+    InstructionRegister IR;
+    IR.OP = 0;
+    IR.L = 0;
+    IR.M = 0; 
     while (!flag) {//Switch or if statements are fine ?
         // Fetch
+        /*
+        if (testCount > 17)
+        {
+            break;
+        }
+        */
+        
+        
+        //testCount++;
         IR.OP = pas[PC]; 
         IR.L = pas[PC + 1]; 
         IR.M = pas[PC + 2];  
-        PC += 3; 
+        
 
         // Execute 
         if (IR.OP == 1) { 
@@ -75,7 +86,7 @@ int main(int argc, char* argv[]) {
             // RTN OPERATION
             if (IR.M == 0)
             {
-                SP = BP - 1;
+                SP = BP + 1;
                 BP = pas[SP - 2];
                 PC = pas[SP - 3];
             }
@@ -193,7 +204,9 @@ int main(int argc, char* argv[]) {
             {
                 SP--;
                 printf("Please Enter an Integer: ");
-                scanf("%c", &pas[SP]); //HANDLE CHAR TO INT CONVERSION ?*****
+                char i = scanf("%c",&i); //HANDLE CHAR TO INT CONVERSION ?*****
+                int c = i - '0';
+                pas[SP] = c;
             }
 
             if (IR.M == 3)
@@ -202,7 +215,9 @@ int main(int argc, char* argv[]) {
             }
             
         }
-        
+        printf("Current - IR: %d %d %d ||||  ",IR.OP,IR.L,IR.M);
+        printf("Current - PC: %d BP: %d SP: %d\n",PC,BP,SP);
+        PC += 3; 
     }
 
     // After the fetch-execute cycle is done we need to output it
