@@ -3,6 +3,7 @@
 #define ARRAY_SIZE 500 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 // Global Variables 
 int BP = 499, SP = 500, PC = 0;
@@ -51,30 +52,36 @@ int main(int argc, char* argv[]) {
     fclose(file);
 
     
-
-    printf("INITIAL VALUES - PC: %d BP: %d SP: %d\n",PC,BP,SP);
+    printf("                        PC   BP   SP    stack\n");
+    printf("INITIAL VALUES:         %-3d  %-3d  %-3d\n",PC,BP,SP);
     // Instruction Cycle
-    int flag = 0; 
+    int flag = -1; 
     int testCount = 0;
     InstructionRegister IR;
     IR.OP = 0;
     IR.L = 0;
     IR.M = 0; 
-    while (!flag) {//Switch or if statements are fine ?
+    while (flag != 0) {
         // Fetch
-        /*
-        if (testCount > 17)
+        printf("    %-3d %-3d %-3d         %-3d  %-3d  %-3d ",IR.OP,IR.L,IR.M,PC,BP,SP);
+       
+        for (int i = ARRAY_SIZE - 1; i >= SP; i--)
         {
-            break;
+            if (IR.OP == 5)
+            {
+                /* code */
+            }
+            
+            printf("  %d ",pas[i]);
         }
-        */
+        printf("\n");
         
         
         //testCount++;
         IR.OP = pas[PC]; 
         IR.L = pas[PC + 1]; 
         IR.M = pas[PC + 2];  
-        
+        PC += 3; 
 
         // Execute 
         if (IR.OP == 1) { 
@@ -93,62 +100,62 @@ int main(int argc, char* argv[]) {
 
             if (IR.M == 1)//ADD OP
             {
-                pas[SP - 1] = pas[SP - 1] + pas[SP];
-                SP--; 
+                pas[SP + 1] = pas[SP + 1] + pas[SP];
+                SP++; 
             }
 
             if (IR.M == 2)//SUB OP
             {
-                pas[SP - 1] = pas[SP - 1] - pas[SP];
-                SP--;
+                pas[SP + 1] = pas[SP + 1] - pas[SP];
+                SP++;
             }
 
             if (IR.M == 3)//MUL OP
             {
-                pas[SP - 1] = pas[SP - 1] * pas[SP];
-                SP--;
+                pas[SP + 1] = pas[SP + 1] * pas[SP];
+                SP++;
             }
 
             if (IR.M == 4)//DIV OP
             {
-                pas[SP - 1] = pas[SP - 1] / pas[SP];
-                SP--;
+                pas[SP + 1] = pas[SP + 1] / pas[SP];
+                SP++;
             }
 
             if (IR.M == 5)//EQL OP
             {
-                pas[SP - 1] = pas[SP - 1] == pas[SP];
-                SP--;
+                pas[SP + 1] = pas[SP + 1] == pas[SP];
+                SP++;
             }
 
             if (IR.M == 6)//NEQ OP
             {
-                pas[SP - 1] = pas[SP - 1] != pas[SP];
-                SP--;
+                pas[SP + 1] = pas[SP + 1] != pas[SP];
+                SP++;
             }
 
             if (IR.M == 7)//LSS OP
             {
-                pas[SP - 1] = pas[SP - 1] < pas[SP];
-                SP--;
+                pas[SP + 1] = pas[SP + 1] < pas[SP];
+                SP++;
             }
 
             if (IR.M == 8)//LEQ OP
             {
-                pas[SP - 1] = pas[SP - 1] <= pas[SP];
-                SP--;
+                pas[SP + 1] = pas[SP + 1] <= pas[SP];
+                SP++;
             }
 
             if (IR.M == 9)//GTR OP
             {
-                pas[SP - 1] = pas[SP - 1] > pas[SP];
-                SP--;
+                pas[SP + 1] = pas[SP + 1] > pas[SP];
+                SP++;
             }
 
             if (IR.M == 10)//GEQ OP
             {
-                pas[SP - 1] = pas[SP - 1] >= pas[SP];
-                SP--;
+                pas[SP + 1] = pas[SP + 1] >= pas[SP];
+                SP++;
             }
 
             if (IR.M == 11)//ODD OP
@@ -165,7 +172,7 @@ int main(int argc, char* argv[]) {
         else if (IR.OP == 4) { 
             // STO OPERATOR
             pas[base(BP,IR.L) - IR.M] = pas[SP];
-            SP--;
+            SP++;
         }
         else if (IR.OP == 5) { 
             // CAL OPERATION
@@ -188,15 +195,16 @@ int main(int argc, char* argv[]) {
             if (pas[SP] == 0)
             {
                 PC = IR.M;
-                SP++;
+                
             }
+            SP++;
             
         }
         else if (IR.OP == 9) { 
             // SYS OPERATIONS
             if (IR.M == 1)
             {
-                printf("%d",pas[SP]);
+                printf("Output result is: %d\n",pas[SP]);
                 SP++;
             }
 
@@ -204,20 +212,24 @@ int main(int argc, char* argv[]) {
             {
                 SP--;
                 printf("Please Enter an Integer: ");
-                char i = scanf("%c",&i); //HANDLE CHAR TO INT CONVERSION ?*****
-                int c = i - '0';
-                pas[SP] = c;
+                int i =  0;
+                scanf("%d",&i); 
+                pas[SP] = i;
             }
 
             if (IR.M == 3)
             {
                 flag = 0;
+                printf("    %-3d %-3d %-3d         %-3d  %-3d  %-3d ",IR.OP,IR.L,IR.M,PC,BP,SP);
+                for (int i = ARRAY_SIZE - 1; i >= SP; i--){
+                    printf("  %d ",pas[i]);
+                }
+
             }
             
         }
-        printf("Current - IR: %d %d %d ||||  ",IR.OP,IR.L,IR.M);
-        printf("Current - PC: %d BP: %d SP: %d\n",PC,BP,SP);
-        PC += 3; 
+        
+        
     }
 
     // After the fetch-execute cycle is done we need to output it
