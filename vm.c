@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
                     strcpy(IR.opName, "DIV");
                 }
                 if (IR.M == 5) {
-                    strcpy(IR.opName, "EQ");
+                    strcpy(IR.opName, "EQL");
                 }
                 if (IR.M == 6) {
                     strcpy(IR.opName, "NEQ");
@@ -288,6 +288,7 @@ int main(int argc, char* argv[]) {
                 for (int i = ARRAY_SIZE - 1; i >= SP; i--){
                     printf("  %d ",pas[i]);
                 }
+                printf("\n");
             }   
         }      
     }    
