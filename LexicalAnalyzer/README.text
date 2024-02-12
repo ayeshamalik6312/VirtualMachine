@@ -2,3 +2,13 @@ Collaborators: Daniel Rojas and Ayesha Malik
 Tasks: 
 
 Overview of Lexical Analyzer: 
+Implementation of a lexical analyzer for the programming language PL/0.
+- It is capable of reading a PL/0 source program, identifying some errors, and producing as an output
+the source program and a lexeme table and list for the source program.
+
+Input: 
+- File containing PL/0 program, with the following constraints:
+- Max length of identifiers is 11 characters.
+- Max length of numbers is 5 digits in length.
+- Comments and invisible characters are ignored.
+- Does not check for syntaz
