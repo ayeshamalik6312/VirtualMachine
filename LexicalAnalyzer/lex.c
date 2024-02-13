@@ -10,7 +10,7 @@
 char buffer[10000] = {0}; //For reading in
 typedef struct token {
     int type;
-    char lexeme[MAX_IDENTIFIER];
+    char lexeme[MAX_IDENTIFIER + 1];
 } token;
 
 // Reserved Words
@@ -55,30 +55,68 @@ int main(int argc, char* argv[]) {
 
 
     printf("%s", buffer);
-    // seperateTokens(size);
+    seperateTokens(size);
 
     return 0;
 }
 
 
 // Helper functions
+/// *******This is broken*****************
 void seperateTokens(int size) {
-  for (int i = 0; i < size; i++)  {
-      token t;
-      if (isalpha(buffer[i])) {
-          // check to see if its an identifier or reserved word
+  int i = 0;
+  while (i < strlen(buffer)) {
+      // if its a white space then do nothing its not a lexeme
+      if (isWhiteSpace(buffer[i])) {
+          i++;
+          printf("White Space");
+          continue;
       }
-      else if (isdigit(buffer[i])) {
-          // check to see if num is valid length
+
+      int p, boolean = 0;
+      for(p=0; i <= 12; i++)
+      {
+          if(buffer[i] == specialSymbols[i]) {
+              boolean = 1;
+              break;
+          }
       }
-      else if (isWhiteSpace(buffer[i])) {
-          // ignore
+
+      if (boolean) {
+          // add token to list as a special symbol
+          i++;
+          printf("Special Symbol!");
+          continue;
       }
-      else if(isSpecialSymbol(buffer[i])) {
+
+      if (isalnum(buffer[i])) {
+          char temp[50];
+          int j = i, k = 0;
+          while (!isWhiteSpace(buffer[j])) {
+              temp[k] = buffer[j];
+              j++;
+              k++;
+          }
+          i = j;
+
+          for (int l = 0; l < 14; l++) {
+              if (strcmp(temp, reservedWords[l])) {
+                  // add token to token list as a reserved words
+                  printf("Reserved word!");
+                  i++;
+                  break;
+              }
+          }
+
+          // here if its none of the above then store as an identifer and do a length check.
 
       }
   }
 }
+
+/*
+ *
+ */
 
 int isWhiteSpace(char c) {
     if(c == ' ' || c == '\n' || c == '\t' || c == '\r')
@@ -86,16 +124,6 @@ int isWhiteSpace(char c) {
     return 0;
 }
 
-int isSpecialSymbol(char c)
-{
-    int i;
-    for(i=0; i <= 12; i++)
-    {
-        if(c == specialSymbols[i])
-            return 1;
-    }
-    return 0;
-}
 
 void printToken() {
 
