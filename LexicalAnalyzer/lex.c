@@ -1,4 +1,3 @@
-
 // Collaborators: Daniel Rojas and Ayesha Malik
 
 #include <stdio.h>
@@ -8,7 +7,7 @@
 
 #define MAX_IDENTIFIER 11
 #define MAX_NUMBER 5
-char buffer[10000]; //For reading in tokens
+char buffer[10000] = {0}; //For reading in
 typedef struct token {
     int type;
     char lexeme[MAX_IDENTIFIER];
@@ -43,20 +42,20 @@ int isNum(char c);
 int isWhiteSpace(char c);
 int isSpecialSymbol(char c);
 
-int main() {
+int main(int argc, char* argv[]) {
     // File Management
-    char name[50]; //Name of input file
-    int size = 0;
-    printf("Input File Name\t");
-    scanf("%s", name);
+    char* name = argv[1];
 
+    int size = 0, ch;
     FILE *fp = fopen(name, "r");
-    while (fscanf(fp, "%s", buffer != EOF)) {
-        size++;
+    while ((ch = fgetc(fp)) != EOF) {
+        buffer[size++] = (char)ch;
     }
     fclose(fp);
 
-    seperateTokens(size);
+
+    printf("%s", buffer);
+    // seperateTokens(size);
 
     return 0;
 }
