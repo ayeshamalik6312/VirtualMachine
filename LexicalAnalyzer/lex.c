@@ -7,11 +7,14 @@
 
 #define MAX_IDENTIFIER 11
 #define MAX_NUMBER 5
+
 char buffer[10000] = {0}; //For reading in
-typedef struct token {
-    int type;
-    char lexeme[MAX_IDENTIFIER + 1];
-} token;
+int cap = 100, structSize = 0;
+
+typedef struct Token {
+    int tokenVal;
+    char lexeme[MAX_IDENTIFIER + 1]; // +1 to account for \0
+} Token;
 
 // Reserved Words
 char *reservedWords[] = {
@@ -21,7 +24,7 @@ char *reservedWords[] = {
 
 // Special Symbols
 char specialSymbols[] = {
-        '+', '-', '*', '/', '(', ')', '=', ',', '.', '<', '>', ';', ':'};
+        '+', '-', '*', '/', '(', ')', '=', ',', '.', '<', '>', ';', ':', '!'};
 
 // Lexical Conventions
 int skipsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
@@ -35,17 +38,18 @@ int skipsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
 // should file be read in as an initial arg or like this?
 
 // function definitions:
-void seperateTokens();
+void addStruct(Token* t, char lex[], int tokenVal);
+void seperateTokens(Token * t, int size);
 void printToken();
-int isLetter(char c);
-int isNum(char c);
+int isKeyWord(char word[]);
 int isWhiteSpace(char c);
 int isSpecialSymbol(char c);
 
 int main(int argc, char* argv[]) {
+    Token * t = malloc(cap * sizeof(Token));
+
     // File Management
     char* name = argv[1];
-
     int size = 0, ch;
     FILE *fp = fopen(name, "r");
     while ((ch = fgetc(fp)) != EOF) {
@@ -53,9 +57,12 @@ int main(int argc, char* argv[]) {
     }
     fclose(fp);
 
+    printf("%s\n", buffer);
+    printf ("lex val:  lexeme:   \n");
 
-    printf("%s", buffer);
-    seperateTokens(size);
+    seperateTokens(t, size);
+
+    //// REMBEMBER TO FREE MEMORY AT THE END
 
     return 0;
 }
@@ -63,60 +70,145 @@ int main(int argc, char* argv[]) {
 
 // Helper functions
 /// *******This is broken*****************
-void seperateTokens(int size) {
-  int i = 0;
-  while (i < strlen(buffer)) {
-      // if its a white space then do nothing its not a lexeme
-      if (isWhiteSpace(buffer[i])) {
-          i++;
-          printf("White Space");
-          continue;
-      }
+void seperateTokens(Token * t, int size) {
+    int i = 0;
+    while (i < strlen(buffer)) {
+        // first check to see if its a comment.
+        if (buffer[i] == '/' && buffer[i + 1] == '/') {
+            i++;
+            while(buffer[i] != '\n' && buffer[i] != '\0') {
+                i++;
+            }
+            continue;
+        }
+        // check for white spaces
+        else if (isWhiteSpace(buffer[i])) {
+            i++;
+            continue;
+        }
+        else if (isSpecialSymbol(buffer[i])) {
+            char c[3] = {'\0'};
+            if (buffer[i] == '+') {
+                c[0] = buffer[i];
+                addStruct(t, c, 4);
+            }
+            else if (buffer[i] == '-') {
+                c[0] = buffer[i];
+                addStruct(t, c, 5);
+            }
+            else if (buffer[i] == '*') {
+                c[0] = buffer[i];
+                addStruct(t, c, 6);
+            }
+            else if (buffer[i] == '/') {
+                c[0] = buffer[i];
+                addStruct(t, c, 7);
+            }
+            else if (buffer[i] == '(') {
+                c[0] = buffer[i];
+                addStruct(t, c, 15);
+            }
+            else if (buffer[i] == ')') {
+                c[0] = buffer[i];
+                addStruct(t, c, 16);
+            }
+            else if (buffer[i] == '=') {
+                c[0] = buffer[i];
+                addStruct(t, c, 9);
+            }
+            else if (buffer[i] == ',') {
+                c[0] = buffer[i];
+                addStruct(t, c, 17);
+            }
+            else if (buffer[i] == '.') {
+                c[0] = buffer[i];
+                addStruct(t, c, 19);
+            }
+            else if (buffer[i] == '<') {
+                if (buffer[i + 1] == '=') {
+                    c[0] = buffer[i];
+                    c[1] = buffer[i + 1];
+                    addStruct(t, c, 12);
+                    i++;
+                }
+                else {
+                    c[0] = buffer[i];
+                    addStruct(t, c, 11);
+                }
+            }
+            else if (buffer[i] == '>') {
+                if (buffer[i + 1] == '=') {
+                    c[0] = buffer[i];
+                    c[1] = buffer[i + 1];
+                    addStruct(t, c, 14);
+                    i++;
+                }
+                else {
+                    c[0] = buffer[i];
+                    addStruct(t, c, 13);
+                }
+            }
+            else if (buffer[i] == ';') {
+                c[0] = buffer[i];
+                addStruct(t, c, 18);
+            }
+            else if (buffer[i] == ':' && buffer[i + 1] == '=') {
+                c[0] = buffer[i];
+                c[1] = buffer[i + 1];
+                addStruct(t, c, 20);
+                i++;
+            }
+            else if (buffer[i] == '!' && buffer[i + 1] == '=') {
+                c[0] = buffer[i];
+                c[1] = buffer[i + 1];
+                addStruct(t, c, 10);
+                i++;
+            }
+            i++;
+            continue;
+        }
+        else if (isalnum(buffer[i])) {
+            char temp[13];
+            int j = 0;
+            for (int i = 0; i < 13; i++) {
+                temp[i] = '\0';
+            }
+            while (isalnum(buffer[i])) {
+                temp[j++] = buffer [i++];
+            }
+            if (j > MAX_IDENTIFIER) {
+                printf("Lexical Error: Name too long.\n");
+                continue;
+            }
+            else if (isKeyWord(temp) > 0) {
+                int val = 0;
+                val = isKeyWord(temp);
+                addStruct(t, temp, val);
+            }
 
-      int p, boolean = 0;
-      for(p=0; i <= 12; i++)
-      {
-          if(buffer[i] == specialSymbols[i]) {
-              boolean = 1;
-              break;
-          }
-      }
+            int flag = 0, k;
+            for (k = 0; k < strlen(temp); k++) {
+                if (!isdigit(temp[i])) {
+                    flag = 1;
+                }
+            }
 
-      if (boolean) {
-          // add token to list as a special symbol
-          i++;
-          printf("Special Symbol!");
-          continue;
-      }
+            if (flag == 0 && k > 5) {
+                printf("Lexical Error: Number too long.\n") ;
+            }
+            else if (flag == k && k <= 5) {
+                addStruct(t, temp, 3);
+            }
 
-      if (isalnum(buffer[i])) {
-          char temp[50];
-          int j = i, k = 0;
-          while (!isWhiteSpace(buffer[j])) {
-              temp[k] = buffer[j];
-              j++;
-              k++;
-          }
-          i = j;
+            //else is it a digit, if so is it <5
+            // else it is an identifer
 
-          for (int l = 0; l < 14; l++) {
-              if (strcmp(temp, reservedWords[l])) {
-                  // add token to token list as a reserved words
-                  printf("Reserved word!");
-                  i++;
-                  break;
-              }
-          }
-
-          // here if its none of the above then store as an identifer and do a length check.
-
-      }
-  }
+            // check to see if its a number, if number check to see if # < 6
+            // if its none of those it must be an identifier or an invalid symbol
+        }
+        i++;
+    }
 }
-
-/*
- *
- */
 
 int isWhiteSpace(char c) {
     if(c == ' ' || c == '\n' || c == '\t' || c == '\r')
@@ -124,7 +216,72 @@ int isWhiteSpace(char c) {
     return 0;
 }
 
+int isSpecialSymbol(char c) {
+    for (int i = 0; i < 14; i++) {
+        if (c == specialSymbols[i]) {
+            return 1;
+        }
+    }
+   return 0 ;
+}
 
-void printToken() {
-
+void addStruct(Token* t, char lex[], int tokenVal)
+{
+    if (structSize >= cap) {
+        cap *= 2;
+        Token * temp = realloc(t, cap * sizeof(Token));
+        t = temp;
+    }
+    strcpy(t[structSize].lexeme, lex);
+    t[structSize].tokenVal = tokenVal;
+    printf("%d \t", t[structSize].tokenVal);
+    printf("%s\n", t[structSize].lexeme);
+    structSize++;
+}
+int isKeyWord(char word[]) {
+    if (!strcmp(word, "begin")) {
+        return 21;
+    }
+    else if (!strcmp(word, "end")) {
+        return 22;
+    }
+    else if (!strcmp(word, "if")) {
+        return 23;
+    }
+    else if (!strcmp(word, "then")) {
+        return 24;
+    }
+    else if (!strcmp(word, "while")) {
+        return 25;
+    }
+    else if (!strcmp(word, "do")) {
+        return 26;
+    }
+    else if (!strcmp(word, "call")) {
+        return 27;
+    }
+    else if (!strcmp(word, "const")) {
+        return 28;
+    }
+    else if (!strcmp(word, "var")) {
+        return 29;
+    }
+    else if (!strcmp(word, "procedure")) {
+        return 30;
+    }
+    else if (!strcmp(word, "write")) {
+        return 31;
+    }
+    else if (!strcmp(word, "read")) {
+        return 32;
+    }
+    else if (!strcmp (word, "fi")) {
+        return 8;
+    }
+    else if (!strcmp(word, "else")) {
+        return 33;
+    }
+    else {
+        return 0;
+    }
 }
