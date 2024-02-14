@@ -58,10 +58,14 @@ int main(int argc, char* argv[]) {
     fclose(fp);
 
     printf("%s\n", buffer);
-    printf ("lex val:  lexeme:   \n");
+    printf ("lex val: lexeme:   \n");
 
     seperateTokens(t, size);
 
+    for (int i = 0; i < structSize; i++) {
+        printf("%d \t", t[i].tokenVal);
+        printf("%s\n", t[i].lexeme);
+    }
     // freeing memory at the end
     free(t);
     t = NULL;
@@ -226,11 +230,15 @@ void seperateTokens(Token * t, int size) {
                     continue;
                 }
             }
-            // if its not a number check if it's an invalid symbol.
-            // if its not an invalid symbol then add it as an identfier
+            // if its not a keyword or number its an identifier
             else {
                 addStruct(t, temp, 2);
             }
+        }
+            // if its not a number or letter or special symbol, it's an invalid symbol.
+
+        else {
+            printf("Lexical Error: invalid symbol: %c\n", buffer[i]);
         }
         i++;
     }
@@ -252,21 +260,6 @@ int isSpecialSymbol(char c) {
         }
     }
    return 0 ;
-}
-
-// handles array of structs stuff execpt for initalization and freeing
-void addStruct(Token* t, char lex[], int tokenVal)
-{
-    if (structSize >= cap) {
-        cap *= 2;
-        Token * temp = realloc(t, cap * sizeof(Token));
-        t = temp;
-    }
-    strcpy(t[structSize].lexeme, lex);
-    t[structSize].tokenVal = tokenVal;
-    printf("%d \t", t[structSize].tokenVal);
-    printf("%s\n", t[structSize].lexeme);
-    structSize++;
 }
 
 // compares word with keywords, if matched, it returns the lex val.
@@ -316,4 +309,17 @@ int isKeyWord(char word[]) {
     else {
         return 0;
     }
+}
+
+// handles array of structs stuff execpt for initalization and freeing
+void addStruct(Token* t, char lex[], int tokenVal)
+{
+    if (structSize >= cap) {
+        cap *= 2;
+        Token * temp = realloc(t, cap * sizeof(Token));
+        t = temp;
+    }
+    strcpy(t[structSize].lexeme, lex);
+    t[structSize].tokenVal = tokenVal;
+    structSize++;
 }
