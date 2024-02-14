@@ -8,6 +8,7 @@
 #define MAX_IDENTIFIER 11
 #define MAX_NUMBER 5
 
+
 char buffer[10000] = {0}; //For reading in
 int cap = 100, structSize = 0;
 
@@ -25,6 +26,7 @@ char *reservedWords[] = {
 // Special Symbols
 char specialSymbols[] = {
         '+', '-', '*', '/', '(', ')', '=', ',', '.', '<', '>', ';', ':', '!'};
+        
 
 // Lexical Conventions
 int skipsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
