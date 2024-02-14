@@ -62,8 +62,9 @@ int main(int argc, char* argv[]) {
 
     seperateTokens(t, size);
 
-    //// REMBEMBER TO FREE MEMORY AT THE END
-
+    // freeing memory at the end
+    free(t);
+    t = NULL;
     return 0;
 }
 
@@ -74,8 +75,19 @@ void seperateTokens(Token * t, int size) {
     int i = 0;
     while (i < strlen(buffer)) {
         // first check to see if its a comment.
-        if (buffer[i] == '/' && buffer[i + 1] == '/') {
+        if (buffer[i] == '/' && buffer[i + 1] == '*') {
+            i+=2; // Move past the "/*"
+            // keep iterating until you've skipped over the whole comment
+            while (i < strlen(buffer) - 1 && !(buffer[i] == '*' && buffer[i + 1] == '/')) {
+                i++;
+            }
+            i +=2; // Move past the "*/"
+            continue;
+        }
+        // check to see if its other kind of comment
+        else if (buffer[i] == '/' && buffer[i + 1] == '/') {
             i++;
+            // keep iterating until you've skipped over the whole comment
             while(buffer[i] != '\n' && buffer[i] != '\0') {
                 i++;
             }
@@ -86,6 +98,7 @@ void seperateTokens(Token * t, int size) {
             i++;
             continue;
         }
+        // is it a special symbol? if so add it to token struct array
         else if (isSpecialSymbol(buffer[i])) {
             char c[3] = {'\0'};
             if (buffer[i] == '+') {
@@ -167,55 +180,71 @@ void seperateTokens(Token * t, int size) {
             i++;
             continue;
         }
+
+        // is it a number or digit?
         else if (isalnum(buffer[i])) {
-            char temp[13];
+            // if so create a temp array to store it
+            char temp[50];
             int j = 0;
-            for (int i = 0; i < 13; i++) {
-                temp[i] = '\0';
-            }
+            // resetting arr val ever time
+            memset(temp, '\0', sizeof(temp));
+            // iterate through characters until you hit something not a num or letter
             while (isalnum(buffer[i])) {
                 temp[j++] = buffer [i++];
             }
+            temp[j] = '\0';
+            // if its longer than 11 digits then print error right away
             if (j > MAX_IDENTIFIER) {
-                printf("Lexical Error: Name too long.\n");
+                printf("Lexical Error: Name too long: %s\n", temp);
                 continue;
             }
+            // check if its a key word
             else if (isKeyWord(temp) > 0) {
                 int val = 0;
                 val = isKeyWord(temp);
                 addStruct(t, temp, val);
+                continue;
             }
-
-            int flag = 0, k;
-            for (k = 0; k < strlen(temp); k++) {
-                if (!isdigit(temp[i])) {
+            // is it a number?
+            int flag = 0;
+            for (int k = 0; k < j; k++) {
+                if (!isdigit(temp[k])) {
                     flag = 1;
+                    break;
                 }
             }
 
-            if (flag == 0 && k > 5) {
-                printf("Lexical Error: Number too long.\n") ;
+            // if it is a number but more than 5 digits, print error
+            if (flag == 0) {
+                if (j > MAX_NUMBER) {
+                    printf("Lexical Error: Number too long: %s\n", temp);
+                    continue;
+                }
+                // if it is a number and appropriate length, add it to array
+                else {
+                    addStruct(t, temp, 3);
+                    continue;
+                }
             }
-            else if (flag == k && k <= 5) {
-                addStruct(t, temp, 3);
+            // if its not a number check if it's an invalid symbol.
+            // if its not an invalid symbol then add it as an identfier
+            else {
+                addStruct(t, temp, 2);
             }
-
-            //else is it a digit, if so is it <5
-            // else it is an identifer
-
-            // check to see if its a number, if number check to see if # < 6
-            // if its none of those it must be an identifier or an invalid symbol
         }
         i++;
     }
 }
 
+/// HELPER FUNCTIONS
+// checks for all kinds of white spaces
 int isWhiteSpace(char c) {
     if(c == ' ' || c == '\n' || c == '\t' || c == '\r')
         return 1;
     return 0;
 }
 
+// special symbol detection
 int isSpecialSymbol(char c) {
     for (int i = 0; i < 14; i++) {
         if (c == specialSymbols[i]) {
@@ -225,6 +254,7 @@ int isSpecialSymbol(char c) {
    return 0 ;
 }
 
+// handles array of structs stuff execpt for initalization and freeing
 void addStruct(Token* t, char lex[], int tokenVal)
 {
     if (structSize >= cap) {
@@ -238,6 +268,8 @@ void addStruct(Token* t, char lex[], int tokenVal)
     printf("%s\n", t[structSize].lexeme);
     structSize++;
 }
+
+// compares word with keywords, if matched, it returns the lex val.
 int isKeyWord(char word[]) {
     if (!strcmp(word, "begin")) {
         return 21;
