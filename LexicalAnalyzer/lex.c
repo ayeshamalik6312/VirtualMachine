@@ -69,6 +69,21 @@ int main(int argc, char* argv[]) {
         printf("%s \t\t",t[i].lexeme);
         printf("%d\n", t[i].tokenVal);
     }
+
+    printf("\nToken List:\n");
+    for (int i = 0; i < structSize; i++)
+    {   
+        
+        printf("%d ", t[i].tokenVal);
+        
+        if (t[i].tokenVal == 2)
+        {
+            printf("%s ", t[i].lexeme);
+        }
+        
+        
+    }
+    
     // freeing memory at the end
     free(t);
     t = NULL;
