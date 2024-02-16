@@ -244,7 +244,7 @@ void separateTokens(Token * t, int size) {
             // if it is a number but more than 5 digits, print error
             if (flag == 0) {
                 if (j > MAX_NUMBER) {
-                    printf("Lexical Error: Number too long: %s\n", temp);
+                    printf("%s Lexical Error: Number too long \n", temp);
                     continue;
                 }
                 // if it is a number and appropriate length, add it to array
@@ -261,7 +261,9 @@ void separateTokens(Token * t, int size) {
             // if its not a number or letter or special symbol, it's an invalid symbol.
 
         else {
-            printf("Lexical Error: invalid symbol: %c\n", buffer[i]);
+            printf("%c Lexical Error: invalid symbol \n", buffer[i]);
+            i++;
+            continue;
         }
         
         
