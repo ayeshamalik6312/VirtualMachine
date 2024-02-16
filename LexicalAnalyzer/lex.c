@@ -222,7 +222,7 @@ void seperateTokens(Token * t, int size) {
             temp[j] = '\0';
             // if its longer than 11 digits then print error right away
             if (j > MAX_IDENTIFIER) {
-                printf("Lexical Error: Name too long: %s\n", temp);
+                printf("%s Error: Name too long \n", temp);
                 continue;
             }
             // check if its a key word
