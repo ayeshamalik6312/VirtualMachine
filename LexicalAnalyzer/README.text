@@ -1,5 +1,4 @@
-Collaborators: Daniel Rojas and Ayesha Malik 
-Tasks: 
+Collaborators: Daniel Rojas and Ayesha Malik  
 
 Overview of Lexical Analyzer: 
 Implementation of a lexical analyzer for the programming language PL/0.
@@ -11,4 +10,8 @@ Input:
 - Max length of identifiers is 11 characters.
 - Max length of numbers is 5 digits in length.
 - Comments and invisible characters are ignored.
-- Does not check for syntaz
+- Does not check for syntax
+
+IN ORDER TO RUN!*
+Compile the code in the command line with 'gcc -o lex lex.c'
+Run the code with the command ./lex input.txt ,, but replace input.txt with your input file name or the input file name provided

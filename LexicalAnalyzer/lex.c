@@ -41,7 +41,7 @@ int skipsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
 
 // function definitions:
 void addStruct(Token* t, char lex[], int tokenVal);
-void seperateTokens(Token * t, int size);
+void separateTokens(Token * t, int size);
 void printToken();
 int isKeyWord(char word[]);
 int isWhiteSpace(char c);
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     printf("Lexeme Table:\n\n");
     printf("lexeme:   lex val:  \n");
 
-    seperateTokens(t, size);
+    separateTokens(t, size);
 
     for (int i = 0; i < structSize; i++) {
         printf("%s \t\t",t[i].lexeme);
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 
 // Helper functions
 /// *******This is not broken =) *****************
-void seperateTokens(Token * t, int size) {
+void separateTokens(Token * t, int size) {
     int i = 0;
     while (i < strlen(buffer)) {
         // first check to see if its a comment.
