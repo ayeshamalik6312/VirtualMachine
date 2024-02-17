@@ -26,7 +26,7 @@ char *reservedWords[] = {
 // Special Symbols
 char specialSymbols[] = {
         '+', '-', '*', '/', '(', ')', '=', ',', '.', '<', '>', ';', ':', '!'};
-        
+
 
 // Lexical Conventions
 int skipsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
@@ -59,31 +59,28 @@ int main(int argc, char* argv[]) {
     }
     fclose(fp);
 
+    printf("Source Program:\n");
     printf("%s\n", buffer);
-    printf("Lexeme Table:\n\n");
-    printf("lexeme:   lex val:  \n");
+    printf("\nLexeme Table:\n\n");
+    printf("lexeme \t\ttoken type\n");
 
     separateTokens(t, size);
 
-    for (int i = 0; i < structSize; i++) {
-        printf("%s \t\t",t[i].lexeme);
-        printf("%d\n", t[i].tokenVal);
-    }
-
+    // Printing token list
     printf("\nToken List:\n");
     for (int i = 0; i < structSize; i++)
-    {   
-        
+    {
         printf("%d ", t[i].tokenVal);
-        
         if (t[i].tokenVal == 2)
         {
             printf("%s ", t[i].lexeme);
         }
-        
-        
+        if (t[i].tokenVal == 3) {
+            printf("%s ", t[i].lexeme);
+        }
     }
-    
+    printf("\n");
+
     // freeing memory at the end
     free(t);
     t = NULL;
@@ -215,14 +212,12 @@ void separateTokens(Token * t, int size) {
                 temp[j] = buffer [i];
                 i++;
                 j++;
-            
-                
             }
-        
+
             temp[j] = '\0';
             // if its longer than 11 digits then print error right away
             if (j > MAX_IDENTIFIER) {
-                printf("%s Error: Name too long \n", temp);
+                printf("%s  Error: Name is too long \n", temp);
                 continue;
             }
             // check if its a key word
@@ -244,7 +239,7 @@ void separateTokens(Token * t, int size) {
             // if it is a number but more than 5 digits, print error
             if (flag == 0) {
                 if (j > MAX_NUMBER) {
-                    printf("%s Lexical Error: Number too long \n", temp);
+                    printf("%s   Error: Number is too long\n", temp);
                     continue;
                 }
                 // if it is a number and appropriate length, add it to array
@@ -259,14 +254,12 @@ void separateTokens(Token * t, int size) {
             }
         }
             // if its not a number or letter or special symbol, it's an invalid symbol.
-
         else {
-            printf("%c Lexical Error: invalid symbol \n", buffer[i]);
+            printf(  "%c   Error: invalid symbol\n", buffer[i]);
             i++;
             continue;
         }
-        
-        
+
     }
 }
 
@@ -282,7 +275,7 @@ int isWhiteSpace(char c) {
 int isSpecialSymbol(char c) {
     for (int i = 0; i < 14; i++) {
         if (c == specialSymbols[i]) {
-            
+
             return 1;
         }
     }
@@ -348,5 +341,7 @@ void addStruct(Token* t, char lex[], int tokenVal)
     }
     strcpy(t[structSize].lexeme, lex);
     t[structSize].tokenVal = tokenVal;
+    printf("%s \t\t",t[structSize].lexeme);
+    printf("%d\n", t[structSize].tokenVal);
     structSize++;
 }
