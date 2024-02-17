@@ -1,13 +1,13 @@
-var x, y; 
+Source Program:
+var x, y;
 begin
  y := 3;
  x := y + 56;
 end.
 
-
 Lexeme Table:
 
-lexeme:   lex val:
+lexeme          token type
 var             29
 x               2
 ,               17
@@ -28,4 +28,4 @@ end             22
 .               19
 
 Token List:
-29 2 x 17 2 y 18 21 2 y 20 3 18 2 x 20 2 y 4 3 18 22 19
+29 2 x 17 2 y 18 21 2 y 20 3 3 18 2 x 20 2 y 4 3 56 18 22 19
