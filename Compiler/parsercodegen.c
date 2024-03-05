@@ -7,15 +7,22 @@
 
 #define MAX_IDENTIFIER 11
 #define MAX_NUMBER 5
-
+#define MAX_SYMBOL_TABLE_SIZE 500
 
 char buffer[10000] = {0}; //For reading in
 int cap = 100, structSize = 0;
 
-typedef struct Token {
-    int tokenVal;
-    char lexeme[MAX_IDENTIFIER + 1]; // +1 to account for \0
-} Token;
+typedef struct Symbol
+{
+int kind; // const = 1, var = 2, proc = 3
+char lexeme[MAX_IDENTIFIER]; // name up to 11 chars
+int tokenVal; // number (ASCII value)
+int level; // L level
+int addr; // M address
+int mark; // to indicate unavailable or deleted
+}Symbol;
+
+Symbol symbol_table[MAX_SYMBOL_TABLE_SIZE];
 
 // Reserved Words
 char *reservedWords[] = {
@@ -40,15 +47,25 @@ int skipsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
 // should file be read in as an initial arg or like this?
 
 // function definitions:
-void addStruct(Token* t, char lex[], int tokenVal);
-void separateTokens(Token * t, int size);
+void addStruct(Symbol* t, char lex[], int tokenVal);
+void separateTokens(Symbol * t, int size);
 void printToken();
 int isKeyWord(char word[]);
 int isWhiteSpace(char c);
 int isSpecialSymbol(char c);
 
+void program();
+void block();
+void statement();
+void condition();
+void expression();
+void term();
+void factor();
+
 int main(int argc, char* argv[]) {
-    Token * t = malloc(cap * sizeof(Token));
+
+    
+    Symbol * t = malloc(cap * sizeof(Symbol));
 
     // File Management
     char* name = argv[1];
@@ -59,14 +76,11 @@ int main(int argc, char* argv[]) {
     }
     fclose(fp);
 
-    printf("Source Program:\n");
-    printf("%s\n", buffer);
-    printf("\nLexeme Table:\n\n");
-    printf("lexeme \t\ttoken type\n");
+    
 
     separateTokens(t, size);
 
-    // Printing token list
+    // Printing token list -- MODIFY TO MATCH OUTPUT 
     printf("\nToken List:\n");
     for (int i = 0; i < structSize; i++)
     {
@@ -90,7 +104,7 @@ int main(int argc, char* argv[]) {
 
 // Helper functions
 /// *******This is not broken =) *****************
-void separateTokens(Token * t, int size) {
+void separateTokens(Symbol * t, int size) {
     int i = 0;
     while (i < strlen(buffer)) {
         // first check to see if its a comment.
@@ -218,7 +232,7 @@ void separateTokens(Token * t, int size) {
             // if its longer than 11 digits then print error right away
             if (j > MAX_IDENTIFIER) {
                 printf("%s  Error: Name is too long \n", temp);
-                continue;
+                break;
             }
             // check if its a key word
             else if (isKeyWord(temp) > 0) {
@@ -240,7 +254,7 @@ void separateTokens(Token * t, int size) {
             if (flag == 0) {
                 if (j > MAX_NUMBER) {
                     printf("%s   Error: Number is too long\n", temp);
-                    continue;
+                    break;
                 }
                 // if it is a number and appropriate length, add it to array
                 else {
@@ -257,7 +271,7 @@ void separateTokens(Token * t, int size) {
         else {
             printf(  "%c   Error: invalid symbol\n", buffer[i]);
             i++;
-            continue;
+            break;
         }
 
     }
@@ -332,11 +346,11 @@ int isKeyWord(char word[]) {
 }
 
 // handles array of structs stuff execpt for initalization and freeing
-void addStruct(Token* t, char lex[], int tokenVal)
+void addStruct(Symbol* t, char lex[], int tokenVal)
 {
     if (structSize >= cap) {
         cap *= 2;
-        Token * temp = realloc(t, cap * sizeof(Token));
+        Symbol * temp = realloc(t, cap * sizeof(Symbol));
         t = temp;
     }
     strcpy(t[structSize].lexeme, lex);
@@ -344,4 +358,38 @@ void addStruct(Token* t, char lex[], int tokenVal)
     printf("%s \t\t",t[structSize].lexeme);
     printf("%d\n", t[structSize].tokenVal);
     structSize++;
+}
+
+void program(){
+
+}
+
+
+void block(){
+
+}
+
+void statement(){
+
+}
+
+
+void condition(){
+
+
+}
+
+
+void expression(){
+
+}
+
+
+void term(){
+
+}
+
+
+void factor(){
+    
 }
