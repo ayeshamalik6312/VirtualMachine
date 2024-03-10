@@ -332,6 +332,7 @@ void addStruct(Symbol *t, char lex[], int tokenVal) {
 }
 
 int checkErrors(Symbol *t, int size) {
+  int numVars = 0;
   /// error: program must end with a period
   if (t[structSize - 1].tokenVal != 19) {
     printf("Error: Program ended with %d\n", t[structSize - 1].tokenVal);
@@ -348,7 +349,7 @@ int checkErrors(Symbol *t, int size) {
           printf("Error: const must be followed by an identifier\n");
           return 0;
         } else if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
-          printf("Error: Duplicate identifier in symbol table\n");
+          printf("Error: symbol name has already been declared\n");
           return 0;
         } else if (t[i + 1].lexeme[0] != '=') {
           printf("Error: Identifier must be assigned with '=' \n");
@@ -368,7 +369,42 @@ int checkErrors(Symbol *t, int size) {
         i++;
       }
     }
+    // Check for all var rules
+    else if (t[i].tokenVal == 29) {
+      i++;
+      int flag = 1;
+      while (flag) {
+        if (t[i].tokenVal != 2) {
+          printf("Error: var must be followed by an identifier\n");
+          return 0;
+        } else if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
+          printf("Error: variable name has already been delcared\n");
+          return 0;
+        }
+        numVars++;
+        i++;
+        if (t[i].tokenVal == 18) {
+          break;
+        } else if (t[i].tokenVal != 17) {
+          printf(
+              "Error: Variables must be separated by ',' and end with ';'\n");
+          return 0;
+        } else {
+          i++;
+        }
+      }
+    }
+    // STATEMENT
+    if (t[i].tokenVal == 2) {
+
+    } else if (t[i].tokenVal == 21) {
+    } else if (t[i].tokenVal == 23) {
+    } else if (t[i].tokenVal == 25) {
+    } else if (t[i].tokenVal == 32) {
+    } else if (t[i].tokenVal == 31) {
+    }
   }
+  printf("numVars: %d\n", numVars);
 }
 
 int symbolTableCheck(Symbol *t, int size, char *name, int nameIndex) {
