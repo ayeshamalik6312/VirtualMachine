@@ -1,4 +1,4 @@
-// Collaborators: Daniel Rojas and Ayesha Malik
+  // Collaborators: Daniel Rojas and Ayesha Malik
   
   #include <ctype.h>
   #include <stdio.h>
@@ -10,7 +10,7 @@
   #define MAX_SYMBOL_TABLE_SIZE 500
   
   char buffer[10000] = {0}; // For reading in
-  int cap = 100, structSize = 0, numVariables = 0;
+  int cap = 100, structSize = 0, numVariables = 0, *currToken = 0;
   char variableNames[100][MAX_IDENTIFIER + 1]; // +1 for null terminator
   
   typedef struct {
@@ -61,10 +61,13 @@
   int isWhiteSpace(char c);
   int isSpecialSymbol(char c);
   int block(Symbol *t, int size);
-  void condition();
-  void expression();
-  void term();
-  void factor();
+  int constDeclaration(Symbol *t, int *i, int size); 
+int varDeclaration(Symbol *t, int *i, int size);
+void statement(Symbol *t); 
+  void condition(Symbol *t);
+  void expression(Symbol *t);
+  void term(Symbol *t);
+  void factor(Symbol *t);
   void addVariableName(const char *name);
   int symbolTableCheck(Symbol *t, int size, char *name, int nameIndex);
   void add_instruction(int op,int l, int m);
@@ -345,71 +348,18 @@
     int numVars = 0;
   
     // Parsing through all of the rest of the tokens
-    for (int i = 0; i < size; i++) {
-      // Check for all const rules
-      if (t[i].tokenVal == 28) {
-        i++;
-        int flag = 1;
-        while (flag) {
-          if (t[i].tokenVal != 2) {
-            printf("Error: const must be followed by an identifier\n");
-            return 0;
-          } else if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
-            printf("Error: symbol name has already been declared %s\n",
-                   t[i].lexeme);
-            return 0;
-          }
-          i++;
-          if (t[i].lexeme[0] != '=') {
-            printf("Error: Identifier must be assigned with '='\n");
-            return 0;
-          }
-          i++; // Move to the number
-          if (t[i].tokenVal != numbersym) {
-            printf("Error: Identifier must be followed by an integer value\n");
-            return 0;
-          }
-          addVariableName(
-              t[i - 2].lexeme); // Add constant name using the identifier position
-          i++;                  // Move to ',' or ';'
-          if (t[i].tokenVal == semicolonsym) {
-            break; // End of constant declarations
-          } else if (t[i].tokenVal != commasym) {
-            printf(
-                "Error: Constants must be separated by ',' and end with ';'\n");
-            return 0;
-          }
-          i++;
-        }
-      }
-  
-      // Check for all var rules
-      else if (t[i].tokenVal == 29) {
-        i++;
-        int flag = 1;
-        while (flag) {
-          if (t[i].tokenVal != 2) {
-            printf("Error: var must be followed by an identifier\n");
-            return 0;
-          }
-          if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
-            printf("Error: variable name has already been delcared %s\n",
-                   t[i].lexeme);
-            return 0;
-          }
-          addVariableName(t[i].lexeme);
-          i++;
-          if (t[i].tokenVal == 18) {
-            break;
-          } else if (t[i].tokenVal != 17) {
-            printf(
-                "Error: Variables must be separated by ',' and end with ';'\n");
-            return 0;
-          } else {
+        for (int i = 0; i < size; i++) {
+        if (t[i].tokenVal == constsym) {
             i++;
-          }
+            if (!constDeclaration(t, &i, size)) {
+                return 0;
+            }
+        } else if (t[i].tokenVal == varsym) {
+            i++;
+            if (!varDeclaration(t, &i, size)) {
+                return 0;
+            }
         }
-      }
       // Check read
       else if (t[i].tokenVal == 32) {
         i++;
@@ -565,3 +515,76 @@
           instructionCount++;
   
   }
+
+int constDeclaration(Symbol *t, int *i, int size) {
+    int flag = 1;
+    while (flag) {
+        if (t[*i].tokenVal != identsym) {
+            printf("Error: const must be followed by an identifier\n");
+            return 0;
+        } else if (symbolTableCheck(t, size, t[*i].lexeme, *i) != -1) {
+            printf("Error: symbol name has already been declared %s\n", t[*i].lexeme);
+            return 0;
+        }
+
+        (*i)++;
+        if (t[*i].lexeme[0] != '=') {
+            printf("Error: Identifier must be assigned with '='\n");
+            return 0;
+        }
+
+        (*i)++;
+        if (t[*i].tokenVal != numbersym) {
+            printf("Error: Identifier must be followed by an integer value\n");
+            return 0;
+        }
+
+        // ADD CONST TO SYMBOL TABLE HERE 
+
+        (*i)++;
+        if (t[*i].tokenVal == semicolonsym) {
+            break;
+        } else if (t[*i].tokenVal != commasym) {
+            printf("Error: Constants must be separated by ',' and end with ';'\n");
+            return 0;
+        }
+
+        (*i)++;
+    }
+
+    return 1; 
+}
+ 
+
+int varDeclaration(Symbol *t, int *i, int size) {
+  int flag = 1; 
+    while (flag) {
+        if (t[*i].tokenVal != identsym) {
+            printf("Error: var must be followed by an identifier\n");
+            return 0;
+        }
+        if (symbolTableCheck(t, size, t[*i].lexeme, *i) != -1) {
+            printf("Error: variable name has already been declared %s\n", t[*i].lexeme);
+            return 0;
+        }
+
+      //  ADD VAR TO SYMBOL TABLE HERE 
+
+        (*i)++;
+        if (t[*i].tokenVal == semicolonsym) {
+            break;
+        } else if (t[*i].tokenVal != commasym) {
+            printf("Error: Variables must be separated by ',' and end with ';'\n");
+            return 0;
+        }
+
+        (*i)++;
+    }
+
+    return 1; 
+}
+void statement(Symbol *t) {}
+void condition(Symbol *t) {}
+void expression(Symbol *t) {}
+void term(Symbol *t) {}
+void factor(Symbol *t) {}
