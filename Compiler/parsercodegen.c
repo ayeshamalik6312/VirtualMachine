@@ -58,7 +58,7 @@ void condition();
 void expression();
 void term();
 void factor();
-int symbolTableCheck(Symbol *t, int size, char *name);
+int symbolTableCheck(Symbol *t, int size, char *name, int nameIndex);
 
 int main(int argc, char *argv[]) {
 
@@ -88,6 +88,9 @@ int main(int argc, char *argv[]) {
   }
 
   int error = checkErrors(t, size);
+  if (error == 0) {
+    return 0;
+  }
   printf("\n");
 
   // freeing memory at the end
@@ -273,7 +276,6 @@ int isWhiteSpace(char c) {
 int isSpecialSymbol(char c) {
   for (int i = 0; i < 14; i++) {
     if (c == specialSymbols[i]) {
-
       return 1;
     }
   }
@@ -330,7 +332,6 @@ void addStruct(Symbol *t, char lex[], int tokenVal) {
 }
 
 int checkErrors(Symbol *t, int size) {
-  printf("Checking for Errors now!\n");
   /// error: program must end with a period
   if (t[structSize - 1].tokenVal != 19) {
     printf("Error: Program ended with %d\n", t[structSize - 1].tokenVal);
@@ -346,17 +347,15 @@ int checkErrors(Symbol *t, int size) {
         if (t[i].tokenVal != 2) {
           printf("Error: const must be followed by an identifier\n");
           return 0;
-        } // else if (symbolTableCheck(t, size, t[i].lexeme) != -1) {
-          /// printf("Error: Duplicate identifier in symbol table\n");
-          // break;
-          // }
-        else if (t[i + 1].lexeme[0] != '=') {
+        } else if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
+          printf("Error: Duplicate identifier in symbol table\n");
+          return 0;
+        } else if (t[i + 1].lexeme[0] != '=') {
           printf("Error: Identifier must be assigned with '=' \n");
           return 0;
         } else if (t[i + 2].tokenVal != 3) {
           printf("Error: Identifier must be followed by an integer value\n");
           return 0;
-          ;
         }
         i += 3;
         if (t[i].tokenVal == 18) {
@@ -372,9 +371,9 @@ int checkErrors(Symbol *t, int size) {
   }
 }
 
-int symbolTableCheck(Symbol *t, int size, char *name) {
+int symbolTableCheck(Symbol *t, int size, char *name, int nameIndex) {
   for (int i = 0; i < size; i++) {
-    if (strcmp(t[i].lexeme, name) == 0) {
+    if (strcmp(t[i].lexeme, name) == 0 && i != nameIndex) {
       return i;
     }
   }
