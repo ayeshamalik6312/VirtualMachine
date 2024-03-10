@@ -34,7 +34,7 @@ char specialSymbols[] = {'+', '-', '*', '/', '(', ')', '=',
                          ',', '.', '<', '>', ';', ':', '!'};
 
 // Lexical Conventions
-int skipsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
+int oddsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
     multsym = 6, slashsym = 7, fisym = 8, eqlsym = 9, neqsym = 10, lessym = 11,
     leqsym = 12, gtrsym = 13, geqsym = 14, lparentsym = 15, rparentsym = 16,
     commasym = 17, semicolonsym = 18, periodsym = 19, becomessym = 20,
@@ -52,9 +52,6 @@ int isKeyWord(char word[]);
 int isWhiteSpace(char c);
 int isSpecialSymbol(char c);
 int block(Symbol *t, int size);
-void program();
-void constDeclaration();
-int varDeclaration();
 void condition();
 void expression();
 void term();
@@ -350,18 +347,23 @@ int block(Symbol *t, int size) {
           printf("Error: symbol name has already been declared %s\n",
                  t[i].lexeme);
           return 0;
-        } else if (t[i + 1].lexeme[0] != '=') {
-          printf("Error: Identifier must be assigned with '=' \n");
+        }
+        i++;
+        if (t[i].lexeme[0] != '=') {
+          printf("Error: Identifier must be assigned with '='\n");
           return 0;
-        } else if (t[i + 2].tokenVal != 3) {
+        }
+        i++; // Move to the number
+        if (t[i].tokenVal != numbersym) {
           printf("Error: Identifier must be followed by an integer value\n");
           return 0;
         }
-        addVariableName(t[i].lexeme);
-        i += 3;
-        if (t[i].tokenVal == 18) {
-          break;
-        } else if (t[i].tokenVal != 17) {
+        addVariableName(
+            t[i - 2].lexeme); // Add constant name using the identifier position
+        i++;                  // Move to ',' or ';'
+        if (t[i].tokenVal == semicolonsym) {
+          break; // End of constant declarations
+        } else if (t[i].tokenVal != commasym) {
           printf(
               "Error: Constants must be separated by ',' and end with ';'\n");
           return 0;
@@ -369,6 +371,7 @@ int block(Symbol *t, int size) {
         i++;
       }
     }
+
     // Check for all var rules
     else if (t[i].tokenVal == 29) {
       i++;
@@ -377,13 +380,13 @@ int block(Symbol *t, int size) {
         if (t[i].tokenVal != 2) {
           printf("Error: var must be followed by an identifier\n");
           return 0;
-        } 
+        }
         if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
           printf("Error: variable name has already been delcared %s\n",
                  t[i].lexeme);
           return 0;
         }
-        addVariableName(t[i].lexeme); 
+        addVariableName(t[i].lexeme);
         i++;
         if (t[i].tokenVal == 18) {
           break;
@@ -415,6 +418,19 @@ int block(Symbol *t, int size) {
         printf("Error: assignment statements must use :=");
         return 0;
       }
+      i++;
+      /*  EXPRESSION
+          emit STO (M = table[symIdx].addr)
+          return
+          if token == beginsym
+          do
+          get next token
+          STATEMENT
+          while token == semicolonsym
+          if token != endsym
+          error
+          get next token
+          return */
     }
     // begin / end check
     else if (t[i].tokenVal == 21) {
@@ -430,6 +446,7 @@ int block(Symbol *t, int size) {
         printf("Error: begin must be followed by end\n");
         return 0;
       }
+      i++;
     } // if then handling
     else if (t[i].tokenVal == 23) {
       int nested = 1;
@@ -444,6 +461,11 @@ int block(Symbol *t, int size) {
         printf("Error: if must be followed by then\n");
         return 0;
       }
+      i++;
+      /* STATEMENT
+          code[jpcIdx].M = current code index
+      */
+      // while do handling
     } else if (t[i].tokenVal == 25) {
       int nested = 1;
       while (i++ < size) {
@@ -457,14 +479,23 @@ int block(Symbol *t, int size) {
         printf("Error: while must be followed by do\n");
         return 0;
       }
-
-      while (++i < size && t[i].tokenVal != 26) {
+    } else if (t[i].tokenVal == 15) {
+      int nested = 1;
+      while (i++ < size) {
+        if (t[i].tokenVal == 15) {
+          nested++;
+        } else if (t[i].tokenVal == 16) {
+          nested--;
+        }
       }
-      if (i >= size || t[i].tokenVal != 26) {
+      if (nested != 0) {
+        printf(
+            "Error: right parenthesis must be followed by left parenthesis\n");
         return 0;
       }
+    }
 
-    } else if (t[i].tokenVal == 32) {
+    else if (t[i].tokenVal == 32) {
     } else if (t[i].tokenVal == 31) {
     }
   }
@@ -483,8 +514,4 @@ void addVariableName(const char *name) {
   strncpy(variableNames[numVariables], name, MAX_IDENTIFIER);
   variableNames[numVariables][MAX_IDENTIFIER] = '\0';
   numVariables++;
-  printf("Declared Variables:\n");  
-  for (int i = 0; i < numVariables; i++) {
-      printf("%d: %s\n", i + 1, variableNames[i]);
-  }
 }
