@@ -53,7 +53,6 @@ int isSpecialSymbol(char c);
 int checkErrors(Symbol *t, int size);
 void program();
 void block();
-void statement();
 void condition();
 void expression();
 void term();
@@ -88,9 +87,6 @@ int main(int argc, char *argv[]) {
   }
 
   int error = checkErrors(t, size);
-  if (error == 0) {
-    return 0;
-  }
   printf("\n");
 
   // freeing memory at the end
@@ -349,7 +345,8 @@ int checkErrors(Symbol *t, int size) {
           printf("Error: const must be followed by an identifier\n");
           return 0;
         } else if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
-          printf("Error: symbol name has already been declared\n");
+          printf("Error: symbol name has already been declared %s\n",
+                 t[i].lexeme);
           return 0;
         } else if (t[i + 1].lexeme[0] != '=') {
           printf("Error: Identifier must be assigned with '=' \n");
@@ -378,7 +375,8 @@ int checkErrors(Symbol *t, int size) {
           printf("Error: var must be followed by an identifier\n");
           return 0;
         } else if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
-          printf("Error: variable name has already been delcared\n");
+          printf("Error: variable name has already been delcared %s\n",
+                 t[i].lexeme);
           return 0;
         }
         numVars++;
@@ -394,17 +392,70 @@ int checkErrors(Symbol *t, int size) {
         }
       }
     }
+    // Check read
+    else if (t[i].tokenVal == 32) {
+      i++;
+      if (t[i].tokenVal != 2) {
+        printf("Error: read must be followed by an identifier\n");
+        return 0;
+      }
+      i++;
+    }
     // STATEMENT
     if (t[i].tokenVal == 2) {
-
-    } else if (t[i].tokenVal == 21) {
-    } else if (t[i].tokenVal == 23) {
+      if (symbolTableCheck(t, size, t[i].lexeme, i) == -1) {
+        printf("Error: Undeclared identfier %s\n", t[i].lexeme);
+        return 0;
+      } else if (t[i + 1].tokenVal != 20) {
+        printf("Error: assignment statements must use :=");
+        return 0;
+      }
+    }
+    // begin / end check
+    else if (t[i].tokenVal == 21) {
+      int nested = 1;
+      while (i++ < size) {
+        if (t[i].tokenVal == 21) {
+          nested++;
+        } else if (t[i].tokenVal == 22) {
+          nested--;
+        }
+      }
+      if (nested != 0) {
+        printf("Error: begin must be followed by end\n");
+        return 0;
+      }
+    } // if then handling
+    else if (t[i].tokenVal == 23) {
+      int nested = 1;
+      while (i++ < size) {
+        if (t[i].tokenVal == 23) {
+          nested++;
+        } else if (t[i].tokenVal == 24) {
+          nested--;
+        }
+      }
+      if (nested != 0) {
+        printf("Error: if must be followed by then\n");
+        return 0;
+      }
     } else if (t[i].tokenVal == 25) {
+      int nested = 1;
+      while (i++ < size) {
+        if (t[i].tokenVal == 25) {
+          nested++;
+        } else if (t[i].tokenVal == 26) {
+          nested--;
+        }
+      }
+      if (nested != 0) {
+        printf("Error: while must be followed by do\n");
+        return 0;
+      }
     } else if (t[i].tokenVal == 32) {
     } else if (t[i].tokenVal == 31) {
     }
   }
-  printf("numVars: %d\n", numVars);
 }
 
 int symbolTableCheck(Symbol *t, int size, char *name, int nameIndex) {
