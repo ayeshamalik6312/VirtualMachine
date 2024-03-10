@@ -10,7 +10,8 @@
 #define MAX_SYMBOL_TABLE_SIZE 500
 
 char buffer[10000] = {0}; // For reading in
-int cap = 100, structSize = 0;
+int cap = 100, structSize = 0, numVariables = 0;
+char variableNames[100][MAX_IDENTIFIER + 1]; // +1 for null terminator
 
 typedef struct Symbol {
   int kind;                    // const = 1, var = 2, proc = 3
@@ -50,13 +51,15 @@ void printToken();
 int isKeyWord(char word[]);
 int isWhiteSpace(char c);
 int isSpecialSymbol(char c);
-int checkErrors(Symbol *t, int size);
+int block(Symbol *t, int size);
 void program();
-void block();
+void constDeclaration();
+int varDeclaration();
 void condition();
 void expression();
 void term();
 void factor();
+void addVariableName(const char *name);
 int symbolTableCheck(Symbol *t, int size, char *name, int nameIndex);
 
 int main(int argc, char *argv[]) {
@@ -86,9 +89,12 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  int error = checkErrors(t, size);
+  int error = block(t, size);
   printf("\n");
 
+  if (t[structSize - 1].tokenVal != 19) {
+    printf("Error: Program must end with a period\n");
+  }
   // freeing memory at the end
   free(t);
   t = NULL;
@@ -327,13 +333,9 @@ void addStruct(Symbol *t, char lex[], int tokenVal) {
   structSize++;
 }
 
-int checkErrors(Symbol *t, int size) {
+int block(Symbol *t, int size) {
   int numVars = 0;
-  /// error: program must end with a period
-  if (t[structSize - 1].tokenVal != 19) {
-    printf("Error: Program ended with %d\n", t[structSize - 1].tokenVal);
-    return 0;
-  }
+
   // Parsing through all of the rest of the tokens
   for (int i = 0; i < size; i++) {
     // Check for all const rules
@@ -355,6 +357,7 @@ int checkErrors(Symbol *t, int size) {
           printf("Error: Identifier must be followed by an integer value\n");
           return 0;
         }
+        addVariableName(t[i].lexeme);
         i += 3;
         if (t[i].tokenVal == 18) {
           break;
@@ -374,12 +377,13 @@ int checkErrors(Symbol *t, int size) {
         if (t[i].tokenVal != 2) {
           printf("Error: var must be followed by an identifier\n");
           return 0;
-        } else if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
+        } 
+        if (symbolTableCheck(t, size, t[i].lexeme, i) != -1) {
           printf("Error: variable name has already been delcared %s\n",
                  t[i].lexeme);
           return 0;
         }
-        numVars++;
+        addVariableName(t[i].lexeme); 
         i++;
         if (t[i].tokenVal == 18) {
           break;
@@ -398,8 +402,9 @@ int checkErrors(Symbol *t, int size) {
       if (t[i].tokenVal != 2) {
         printf("Error: read must be followed by an identifier\n");
         return 0;
+      } else {
+        i++;
       }
-      i++;
     }
     // STATEMENT
     if (t[i].tokenVal == 2) {
@@ -452,6 +457,13 @@ int checkErrors(Symbol *t, int size) {
         printf("Error: while must be followed by do\n");
         return 0;
       }
+
+      while (++i < size && t[i].tokenVal != 26) {
+      }
+      if (i >= size || t[i].tokenVal != 26) {
+        return 0;
+      }
+
     } else if (t[i].tokenVal == 32) {
     } else if (t[i].tokenVal == 31) {
     }
@@ -459,10 +471,20 @@ int checkErrors(Symbol *t, int size) {
 }
 
 int symbolTableCheck(Symbol *t, int size, char *name, int nameIndex) {
-  for (int i = 0; i < size; i++) {
-    if (strcmp(t[i].lexeme, name) == 0 && i != nameIndex) {
+  for (int i = 0; i < numVariables; i++) {
+    if (strcmp(variableNames[i], name) == 0) {
       return i;
     }
   }
   return -1;
+}
+
+void addVariableName(const char *name) {
+  strncpy(variableNames[numVariables], name, MAX_IDENTIFIER);
+  variableNames[numVariables][MAX_IDENTIFIER] = '\0';
+  numVariables++;
+  printf("Declared Variables:\n");  
+  for (int i = 0; i < numVariables; i++) {
+      printf("%d: %s\n", i + 1, variableNames[i]);
+  }
 }
