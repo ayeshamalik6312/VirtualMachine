@@ -1,27 +1,27 @@
   // Collaborators: Daniel Rojas and Ayesha Malik
-  
+
   #include <ctype.h>
   #include <stdio.h>
   #include <stdlib.h>
   #include <string.h>
-  
+
   #define MAX_IDENTIFIER 11
   #define MAX_NUMBER 5
   #define MAX_SYMBOL_TABLE_SIZE 500
-  
+
   char buffer[10000] = {0}; // For reading in
   int cap = 100, structSize = 0, numVariables = 0, *currToken = 0;
   char variableNames[100][MAX_IDENTIFIER + 1]; // +1 for null terminator
-  
+
   typedef struct {
       char OP[5]; // Op code
       int L;       // L
       int M;       // M
   } Instruction;
-  
+
   Instruction instructions[MAX_SYMBOL_TABLE_SIZE]; 
   int instructionCount = 0;
-  
+
   typedef struct Symbol {
     int kind;                    // const = 1, var = 2, proc = 3
     char lexeme[MAX_IDENTIFIER]; // name up to 11 chars
@@ -30,18 +30,18 @@
     int addr;                    // M address
     int mark;                    // to indicate unavailable or deleted
   } Symbol;
-  
+
   Symbol symbol_table[MAX_SYMBOL_TABLE_SIZE];
-  
+
   // Reserved Words
   char *reservedWords[] = {"const", "var", "procedure", "call", "begin",
                            "end",   "if",  "fi",        "then", "else",
                            "while", "do",  "read",      "write"};
-  
+
   // Special Symbols
   char specialSymbols[] = {'+', '-', '*', '/', '(', ')', '=',
                            ',', '.', '<', '>', ';', ':', '!'};
-  
+
   // Lexical Conventions
   int oddsym = 1, identsym = 2, numbersym = 3, plussym = 4, minussym = 5,
       multsym = 6, slashsym = 7, fisym = 8, eqlsym = 9, neqsym = 10, lessym = 11,
@@ -50,9 +50,9 @@
       beginsym = 21, endsym = 22, ifsym = 23, thensym = 24, whilesym = 25,
       dosym = 26, callsym = 27, constsym = 28, varsym = 29, procsym = 30,
       writesym = 31, readsym = 32, elsesym = 33;
-  
+
   // should file be read in as an initial arg or like this?
-  
+
   // function definitions:
   void addStruct(Symbol *t, char lex[], int tokenVal);
   void separateTokens(Symbol *t, int size);
@@ -71,12 +71,12 @@ void statement(Symbol *t);
   void addVariableName(const char *name);
   int symbolTableCheck(Symbol *t, int size, char *name, int nameIndex);
   void add_instruction(int op,int l, int m);
-  
-  
+
+
   int main(int argc, char *argv[]) {
-  
+
     Symbol *t = malloc(cap * sizeof(Symbol));
-  
+
     // File Management
     char *name = argv[1];
     int size = 0, ch;
@@ -85,9 +85,9 @@ void statement(Symbol *t);
       buffer[size++] = (char)ch;
     }
     fclose(fp);
-  
+
     separateTokens(t, size);
-  
+
     // Printing token list -- MODIFY TO MATCH OUTPUT
     printf("\nToken List:\n");
     for (int i = 0; i < structSize; i++) {
@@ -99,10 +99,10 @@ void statement(Symbol *t);
         printf("%s ", t[i].lexeme);
       }
     }
-  
+
     int error = block(t, size);
     printf("\n");
-  
+
     if (t[structSize - 1].tokenVal != 19) {
       printf("Error: Program must end with a period\n");
     }
@@ -111,7 +111,7 @@ void statement(Symbol *t);
     t = NULL;
     return 0;
   }
-  
+
   // Helper functions
   /// *******This is not broken =) *****************
   void separateTokens(Symbol *t, int size) {
@@ -214,7 +214,7 @@ void statement(Symbol *t);
         i++;
         continue;
       }
-  
+
       // is it a number or digit?
       else if (isalnum(buffer[i])) {
         // if so create a temp array to store it
@@ -228,7 +228,7 @@ void statement(Symbol *t);
           i++;
           j++;
         }
-  
+
         temp[j] = '\0';
         // if its longer than 11 digits then print error right away
         if (j > MAX_IDENTIFIER) {
@@ -250,7 +250,7 @@ void statement(Symbol *t);
             break;
           }
         }
-  
+
         // if it is a number but more than 5 digits, print error
         if (flag == 0) {
           if (j > MAX_NUMBER) {
@@ -276,7 +276,7 @@ void statement(Symbol *t);
       }
     }
   }
-  
+
   /// HELPER FUNCTIONS
   // checks for all kinds of white spaces
   int isWhiteSpace(char c) {
@@ -284,7 +284,7 @@ void statement(Symbol *t);
       return 1;
     return 0;
   }
-  
+
   // special symbol detection
   int isSpecialSymbol(char c) {
     for (int i = 0; i < 14; i++) {
@@ -294,7 +294,7 @@ void statement(Symbol *t);
     }
     return 0;
   }
-  
+
   // compares word with keywords, if matched, it returns the lex val.
   int isKeyWord(char word[]) {
     if (!strcmp(word, "begin")) {
@@ -329,7 +329,7 @@ void statement(Symbol *t);
       return 0;
     }
   }
-  
+
   // handles array of structs stuff execpt for initalization and freeing
   void addStruct(Symbol *t, char lex[], int tokenVal) {
     if (structSize >= cap) {
@@ -343,10 +343,10 @@ void statement(Symbol *t);
     printf("%d\n", t[structSize].tokenVal);
     structSize++;
   }
-  
+
   int block(Symbol *t, int size) {
     int numVars = 0;
-  
+
     // Parsing through all of the rest of the tokens
         for (int i = 0; i < size; i++) {
         if (t[i].tokenVal == constsym) {
@@ -380,18 +380,15 @@ void statement(Symbol *t);
           return 0;
         }
         i++;
+        if (t[i].tokenVal != becomessym) { 
+          printf("Error: assignment statements must use :=\n");
+          return 0;
+        }
+        i++; 
         /*  EXPRESSION
             emit STO (M = table[symIdx].addr)
             return
-            if token == beginsym
-            do
-            get next token
-            STATEMENT
-            while token == semicolonsym
-            if token != endsym
-            error
-            get next token
-            return */
+            */
       }
       // begin / end check
       else if (t[i].tokenVal == 21) {
@@ -455,13 +452,13 @@ void statement(Symbol *t);
           return 0;
         }
       }
-  
+
       else if (t[i].tokenVal == 32) {
       } else if (t[i].tokenVal == 31) {
       }
     }
   }
-  
+
   int symbolTableCheck(Symbol *t, int size, char *name, int nameIndex) {
     for (int i = 0; i < numVariables; i++) {
       if (strcmp(variableNames[i], name) == 0) {
@@ -470,16 +467,16 @@ void statement(Symbol *t);
     }
     return -1;
   }
-  
+
   void addVariableName(const char *name) {
     strncpy(variableNames[numVariables], name, MAX_IDENTIFIER);
     variableNames[numVariables][MAX_IDENTIFIER] = '\0';
     numVariables++;
   }
-  
+
   void add_instruction(int op,int l, int m){
-  
-  
+
+
     switch(op) {
               case 1:
                   strcpy(instructions[instructionCount].OP, "LIT");
@@ -509,11 +506,11 @@ void statement(Symbol *t);
                   strcpy(instructions[instructionCount].OP, "SYS");
               break;  
           }
-  
+
           instructions[instructionCount].L = l;
           instructions[instructionCount].M = m;
           instructionCount++;
-  
+
   }
 
 int constDeclaration(Symbol *t, int *i, int size) {
@@ -554,7 +551,7 @@ int constDeclaration(Symbol *t, int *i, int size) {
 
     return 1; 
 }
- 
+
 
 int varDeclaration(Symbol *t, int *i, int size) {
   int flag = 1; 
