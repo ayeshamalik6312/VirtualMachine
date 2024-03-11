@@ -1,0 +1,50 @@
+void condition(){
+
+    if (t[current_symbol_idx].tokenVal == 1){
+      current_symbol_idx++;
+      expression();
+      add_instruction(2,0,11);
+    }else{
+      expression();
+      if (t[current_symbol_idx].tokenVal == 9)
+      {
+        current_symbol_idx++;
+        expression();
+        add_instruction(2,0,5);
+      }else if (t[current_symbol_idx].tokenVal == 10)
+      {
+        current_symbol_idx++;
+        expression();
+        add_instruction(2,0,6);
+      }else if (t[current_symbol_idx].tokenVal == 11)
+      {
+        current_symbol_idx++;
+        expression();
+        add_instruction(2,0,7);
+      }else if (t[current_symbol_idx].tokenVal == 12)
+      {
+        current_symbol_idx++;
+        expression();
+        add_instruction(2,0,8);
+      }else if (t[current_symbol_idx].tokenVal == 13)
+      {
+        current_symbol_idx++;
+        expression();
+        add_instruction(2,0,9);
+      }else if (t[current_symbol_idx].tokenVal == 14)
+      {
+        current_symbol_idx++;
+        expression();
+        add_instruction(2,0,10);
+      }else{
+        printf("Error: invalid \n");//FIX THIS BECAUSE I DONT ACTUALLY KNOW WHAT ERROR ITS SUPPOSED TO PRINT *******
+      }
+      
+      
+      
+      
+      
+      
+    } 
+
+  }
