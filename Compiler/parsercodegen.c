@@ -89,17 +89,9 @@ void statement(Symbol *t);
     separateTokens(t, size);
 
     // Printing token list -- MODIFY TO MATCH OUTPUT
-    printf("\nToken List:\n");
-    for (int i = 0; i < structSize; i++) {
-      printf("%d ", t[i].tokenVal);
-      if (t[i].tokenVal == 2) {
-        printf("%s ", t[i].lexeme);
-      }
-      if (t[i].tokenVal == 3) {
-        printf("%s ", t[i].lexeme);
-      }
-    }
-    
+   instructions[0] = (Instruction){"JMP", 0, 3};
+   instructionCount++;
+
     int error = block(t, size);
     printf("\n");
 
@@ -108,6 +100,16 @@ void statement(Symbol *t);
     }
     // freeing memory at the end
 
+
+int numInstructions = sizeof(instructions) / sizeof(instructions[0]);
+
+printf("Line    OP    L    M\n");
+
+    for (int i = 0; i < numInstructions; i++) {
+        if(instructions[i].OP[0] != '\0') { 
+            printf("%4d    %s    %d    %d\n", i, instructions[i].OP, instructions[i].L, instructions[i].M);
+        }
+    }
 
 printf("\nKind | Name        | Value | Level | Address | Mark\n");
     printf("---------------------------------------------------\n");
@@ -355,8 +357,7 @@ printf("\nKind | Name        | Value | Level | Address | Mark\n");
     }
     strcpy(t[structSize].lexeme, lex);
     t[structSize].tokenVal = tokenVal;
-    printf("%s \t\t", t[structSize].lexeme);
-    printf("%d\n", t[structSize].tokenVal);
+    
     structSize++;
   }
 
